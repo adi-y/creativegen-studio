@@ -1,8 +1,7 @@
-// components/LeftSidebar.tsx
 "use client";
 
 import { useState } from 'react';
-import { Upload, Type, Layout, Grid, Shield, Download, Image, Palette, Wand2, Info, Loader2 } from 'lucide-react';
+import { Upload, Type, Layout, Grid, Shield, Download, Image, Palette, Wand2, Info, Loader2, Sparkles } from 'lucide-react';
 
 type LeftSidebarProps = {
   onUpload?: () => void;
@@ -12,8 +11,9 @@ type LeftSidebarProps = {
   onApplyLayout2?: () => void;
   onCheckCompliance?: () => void;
   onExport?: () => void;
+  onGenerateAILayout?: () => void;
   isProcessing?: boolean;
-  hasSelection?: boolean;
+  hasImageSelected?: boolean;
   selectedObjectType?: string | null;
 };
 
@@ -25,8 +25,9 @@ export default function LeftSidebar({
   onApplyLayout2,
   onCheckCompliance,
   onExport,
+  onGenerateAILayout,
   isProcessing = false,
-  hasSelection = false,
+  hasImageSelected = false,
   selectedObjectType = null,
 }: LeftSidebarProps) {
   const [showBgInfo, setShowBgInfo] = useState(false);
@@ -66,7 +67,7 @@ export default function LeftSidebar({
             <div className="relative">
               <button
                 onClick={onRemoveBackground}
-                disabled={!hasSelection || selectedObjectType !== 'image' || isProcessing}
+                disabled={!hasImageSelected || isProcessing}
                 className="w-full flex items-center gap-3 px-4 py-3 bg-gray-800/70 hover:bg-gray-700 border border-gray-700 rounded-xl text-left font-medium transition-all duration-200 group disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <div className="p-2 rounded-lg bg-gray-900/50 group-hover:bg-gray-900 transition-colors">
@@ -76,7 +77,9 @@ export default function LeftSidebar({
                     <Image className="w-4 h-4 text-gray-300 group-hover:text-white" />
                   )}
                 </div>
-                <span className="text-sm text-gray-200">Remove Background</span>
+                <span className="text-sm text-gray-200">
+                  {isProcessing ? 'Removing...' : 'Remove Background'}
+                </span>
                 <span className="ml-auto text-xs bg-purple-500/20 text-purple-300 px-2 py-1 rounded-md border border-purple-500/30">
                   AI
                 </span>
@@ -143,6 +146,23 @@ export default function LeftSidebar({
                 <Grid className="w-4 h-4 text-gray-300 group-hover:text-white" />
               </div>
               <span className="text-sm text-gray-200">Split Grid</span>
+            </button>
+
+            {/* AI Layout Generator */}
+            <button
+              onClick={onGenerateAILayout}
+              disabled={!hasImageSelected}
+              className="w-full flex items-center justify-between px-4 py-3 bg-gradient-to-br from-purple-500/10 to-fuchsia-500/10 hover:from-purple-500/20 hover:to-fuchsia-500/20 border border-purple-500/30 rounded-xl font-medium text-purple-300 transition-all duration-200 group disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-gray-900/50">
+                  <Sparkles className="w-4 h-4" />
+                </div>
+                <span className="text-sm">AI Layout Generator</span>
+              </div>
+              <span className="text-xs bg-purple-500/20 px-2 py-1 rounded-md border border-purple-500/30">
+                AI
+              </span>
             </button>
           </div>
         </div>
