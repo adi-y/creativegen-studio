@@ -16,4 +16,11 @@ npm run dev
 ### Backend
 cd backend  
 pip install -r requirements.txt  
-uvicorn app.main:app --reload
+uvicorn ai_layout_api:app --reload
+
+### Steps to setup Groq API
+
+1) Go to https://console.groq.com/home
+2) Create account → API Keys → Create Key
+3) Paste key into backend/.env
+
