@@ -18,6 +18,7 @@ import {
   Image as ImageIcon,
 } from 'lucide-react';
 import { removeBackground } from '@/lib/api';
+import { ChromePicker } from 'react-color';
 // Modern Header Component
 const Header = () => (
   <header className="h-16 border-b border-gray-800 bg-gradient-to-r from-gray-900 via-purple-900/20 to-gray-900 backdrop-blur-xl flex items-center justify-between px-6 sticky top-0 z-50">
@@ -748,7 +749,7 @@ export default function CreativeGenStudio() {
 
   const handleAILayoutSubmit = async () => {
     setAiGenerating(true);
-    setIsAILayoutModalOpen(false);
+    
 
     let productFile = selectedImageMeta?.file;
     if (!productFile) {
@@ -796,6 +797,7 @@ formData.append('num_variations', '3');
       showStatus(err instanceof Error ? err.message : 'Generation failed', 'error');
     } finally {
       setAiGenerating(false);
+      setIsAILayoutModalOpen(false);
     }
   };
 
@@ -848,112 +850,195 @@ formData.append('num_variations', '3');
       </div>
 
       {/* AI Layout Input Modal */}
-      {isAILayoutModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-          <div className="bg-gray-900 rounded-2xl w-full max-w-md p-6 border border-gray-800">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-bold text-white">AI Layout Generator</h3>
-              <button onClick={() => setIsAILayoutModalOpen(false)} className="text-gray-400 hover:text-white">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            <p className="text-sm text-gray-400 mb-6">Customize your AI-generated ad layout</p>
-            
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm text-gray-300 mb-1">Product Name</label>
-                <input
-                  type="text"
-                  value={aiInputs.category}
-                  onChange={(e) => setAiInputs({ ...aiInputs, category: e.target.value })}
-                  className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white"
-                  placeholder="e.g., shoes, perfume, Shampoo, Airpods"
-                />
-              </div>
-              <div>
-                <label className="block text-sm text-gray-300 mb-1">Primary Brand Color</label>
-                <input
-                  type="text"
-                  value={aiInputs.primaryColor}
-                  onChange={(e) => setAiInputs({ ...aiInputs, primaryColor: e.target.value })}
-                  className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white"
-                  placeholder="e.g., pink or #ff69b4"
-                />
-              </div>
-              <div>
-                <label className="block text-sm text-gray-300 mb-1">Text Color</label>
-                <input
-                  type="text"
-                  value={aiInputs.textColor}
-                  onChange={(e) => setAiInputs({ ...aiInputs, textColor: e.target.value })}
-                  className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white"
-                  placeholder="e.g., white or #ffffff"
-                />
-              </div>
-              <div>
-                <label className="block text-sm text-gray-300 mb-1">Platform</label>
-                <select
-                  value={aiInputs.platform}
-                  onChange={(e) => setAiInputs({ ...aiInputs, platform: e.target.value })}
-                  className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white"
-                >
-                  <option value="instagram_story">Instagram Story</option>
-                  <option value="instagram_square">Instagram Square</option>
-                  <option value="facebook_feed">Facebook Feed</option>
-                  <option value="google_display">Google Display</option>
-                </select>
-              </div>
-
-              {/* 🔹 Logo Upload */}
-              <div>
-                <label className="block text-sm text-gray-300 mb-1">Brand Logo (Optional)</label>
-                <div className="flex items-center gap-3">
-                  <label className="cursor-pointer flex items-center gap-2 text-sm text-gray-400 bg-gray-800 hover:bg-gray-700 px-3 py-2 rounded-lg border border-gray-700">
-                    <ImageIcon className="w-4 h-4" />
-                    <span>Choose Logo</span>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0] || null;
-                        setLogoFile(file);
-                      }}
-                      className="hidden"
-                    />
-                  </label>
-                  {logoFile && (
-                    <span className="text-xs text-green-400 flex items-center gap-1">
-                      <Check className="w-3 h-3" /> {logoFile.name}
-                    </span>
-                  )}
-                </div>
-                <p className="text-xs text-gray-500 mt-1">PNG with transparency recommended</p>
-              </div>
-            </div>
-
-            <div className="flex justify-end gap-3 mt-6">
-              <button
-                onClick={() => {
-                  setIsAILayoutModalOpen(false);
-                  setLogoFile(null);
-                }}
-                className="px-4 py-2 text-gray-300 hover:bg-gray-800 rounded-lg"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleAILayoutSubmit}
-                disabled={aiGenerating}
-                className="px-4 py-2 bg-gradient-to-r from-purple-500 to-fuchsia-500 text-white rounded-lg font-medium flex items-center gap-2 disabled:opacity-50"
-              >
-                {aiGenerating ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-                Generate Layouts
-              </button>
-            </div>
+{isAILayoutModalOpen && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+    <div className="bg-gray-900 rounded-2xl w-full max-w-md p-6 border border-gray-800">
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="text-lg font-bold text-white">AI Layout Generator</h3>
+        <button 
+          onClick={() => setIsAILayoutModalOpen(false)} 
+          className="text-gray-400 hover:text-white"
+          disabled={aiGenerating} // Prevent closing during generation
+        >
+          <X className="w-5 h-5" />
+        </button>
+      </div>
+      <p className="text-sm text-gray-400 mb-6">Customize your AI-generated ad layout</p>
+      
+      
+      {!aiGenerating ? (
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm text-gray-300 mb-1">Product Name</label>
+            <input
+              type="text"
+              value={aiInputs.category}
+              onChange={(e) => setAiInputs({ ...aiInputs, category: e.target.value })}
+              className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white"
+              placeholder="e.g., shoes, perfume, Shampoo, Airpods"
+              disabled={aiGenerating}
+            />
           </div>
+          
+<div>
+  <label className="block text-sm text-gray-300 mb-1">
+    Primary Brand Color
+  </label>
+  <div className="flex items-center gap-3">
+    
+    <div className="flex items-center gap-2">
+      <div 
+        className="w-8 h-8 rounded-md border-2 border-gray-600 cursor-pointer transition-all hover:border-purple-400"
+        style={{ backgroundColor: aiInputs.primaryColor }}
+        onClick={() => document.getElementById('primaryColorPicker')?.click()}
+        title="Click to choose color"
+      />
+      <span className="text-xs text-gray-400">Click to pick</span>
+    </div>
+    
+    
+    <input
+      id="primaryColorPicker"
+      type="color"
+      value={aiInputs.primaryColor}
+      onChange={(e) => setAiInputs({ ...aiInputs, primaryColor: e.target.value })}
+      className="w-0 h-0 opacity-0 absolute"
+      disabled={aiGenerating}
+    />
+    
+    
+    <input
+      type="text"
+      value={aiInputs.primaryColor}
+      onChange={(e) => setAiInputs({ ...aiInputs, primaryColor: e.target.value })}
+      className="flex-1 px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white"
+      disabled={aiGenerating}
+    />
+  </div>
+</div>
+
+
+<div>
+  <label className="block text-sm text-gray-300 mb-1">
+    Text Color
+  </label>
+  <div className="flex items-center gap-3">
+    <div className="flex items-center gap-2">
+      <div 
+        className="w-8 h-8 rounded-md border-2 border-gray-600 cursor-pointer transition-all hover:border-purple-400"
+        style={{ backgroundColor: aiInputs.textColor }}
+        onClick={() => document.getElementById('textColorPicker')?.click()}
+        title="Click to choose color"
+      />
+      <span className="text-xs text-gray-400">Click to pick</span>
+    </div>
+    
+    <input
+      id="textColorPicker"
+      type="color"
+      value={aiInputs.textColor}
+      onChange={(e) => setAiInputs({ ...aiInputs, textColor: e.target.value })}
+      className="w-0 h-0 opacity-0 absolute"
+      disabled={aiGenerating}
+    />
+    
+    <input
+      type="text"
+      value={aiInputs.textColor}
+      onChange={(e) => setAiInputs({ ...aiInputs, textColor: e.target.value })}
+      className="flex-1 px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white"
+      placeholder="#ffffff"
+      disabled={aiGenerating}
+    />
+  </div>
+</div>
+          <div>
+            <label className="block text-sm text-gray-300 mb-1">Platform</label>
+            <select
+              value={aiInputs.platform}
+              onChange={(e) => setAiInputs({ ...aiInputs, platform: e.target.value })}
+              className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white"
+              disabled={aiGenerating}
+            >
+              <option value="instagram_story">Instagram Story</option>
+              <option value="instagram_square">Instagram Square</option>
+              <option value="facebook_feed">Facebook Feed</option>
+              <option value="google_display">Google Display</option>
+            </select>
+          </div>
+
+          {/* Logo Upload */}
+          <div>
+            <label className="block text-sm text-gray-300 mb-1">Brand Logo (Optional)</label>
+            <div className="flex items-center gap-3">
+              <label className="cursor-pointer flex items-center gap-2 text-sm text-gray-400 bg-gray-800 hover:bg-gray-700 px-3 py-2 rounded-lg border border-gray-700">
+                <ImageIcon className="w-4 h-4" />
+                <span>Choose Logo</span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0] || null;
+                    setLogoFile(file);
+                  }}
+                  className="hidden"
+                  disabled={aiGenerating}
+                />
+              </label>
+              {logoFile && (
+                <span className="text-xs text-green-400 flex items-center gap-1">
+                  <Check className="w-3 h-3" /> {logoFile.name}
+                </span>
+              )}
+            </div>
+            <p className="text-xs text-gray-500 mt-1">PNG with transparency recommended</p>
+          </div>
+        </div>
+      ) : (
+        /* PROCESSING STATE */
+        <div className="flex flex-col items-center justify-center py-8">
+          <Loader2 className="w-10 h-10 text-purple-500 animate-spin mb-4" />
+          <h3 className="text-white font-medium">Generating layouts...</h3>
+          <p className="text-gray-400 text-sm mt-1 text-center">
+            Creating 3 unique designs for "{aiInputs.category || 'your product'}"
+          </p>
         </div>
       )}
 
+      {/* Buttons */}
+      <div className="flex justify-end gap-3 mt-6">
+        {!aiGenerating ? (
+          <>
+            <button
+              onClick={() => {
+                setIsAILayoutModalOpen(false);
+                setLogoFile(null);
+              }}
+              className="px-4 py-2 text-gray-300 hover:bg-gray-800 rounded-lg"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleAILayoutSubmit}
+              disabled={aiGenerating}
+              className="px-4 py-2 bg-gradient-to-r from-purple-500 to-fuchsia-500 text-white rounded-lg font-medium flex items-center gap-2"
+            >
+              Generate Layouts
+            </button>
+          </>
+        ) : (
+          /* Disable all actions during processing */
+          <button
+            disabled
+            className="px-6 py-2 bg-gray-800 text-gray-500 rounded-lg cursor-not-allowed"
+          >
+            Please wait...
+          </button>
+        )}
+      </div>
+    </div>
+  </div>
+)}
       {/* Preview Modal */}
       <LayoutPreviewModal
         isOpen={isPreviewOpen}
