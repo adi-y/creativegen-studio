@@ -148,7 +148,53 @@ LAYOUT_TEMPLATES = [
         "product": {"x": 0.5, "y": 0.3, "w": 0.75, "h": 0.45},
         "headline": {"x": 0.5, "y": 0.83, "align": "center"},
         "cta": {"x": 0.5, "y": 0.93, "align": "center"}
+    },
+    
+    {
+    "id": "split_left",
+    "name": "Split Left",
+    "product": {"x": 0.78, "y": 0.5, "w": 0.4, "h": 0.75},
+    "headline": {"x": 0.25, "y": 0.25, "align": "center"},
+    "cta": {"x": 0.25, "y": 0.75, "align": "center"}
+},
+{
+    "id": "headline_left",
+    "name": "Headline Left Focus",
+    "product": {"x": 0.65, "y": 0.55, "w": 0.5, "h": 0.6},
+    "headline": {"x": 0.2, "y": 0.4, "align": "left"},
+    "cta": {"x": 0.2, "y": 0.6, "align": "left"}
+},
+{
+    "id": "overlay_center",
+    "name": "Overlay Center",
+    "product": {"x": 0.5, "y": 0.5, "w": 0.9, "h": 0.9},
+    "headline": {"x": 0.5, "y": 0.45, "align": "center"},
+    "cta": {"x": 0.5, "y": 0.6, "align": "center"}
+},
+{
+    "id": "corner_product",
+    "name": "Corner Product",
+    "product": {"x": 0.82, "y": 0.78, "w": 0.32, "h": 0.32},
+    "headline": {"x": 0.1, "y": 0.15, "align": "left"},
+    "cta": {"x": 0.1, "y": 0.3, "align": "left"}
+},
+
+{
+    "id": "vertical_stack_clean",
+    "name": "Vertical Stack Clean",
+    "product": { "x": 0.5, "y": 0.55, "w": 0.6, "h": 0.55 },
+    "headline": {
+        "x": 0.5,
+        "y": 0.15,
+        "align": "center"
+    },
+    "cta": {
+        "x": 0.5,
+        "y": 0.85,
+        "align": "center"
     }
+}
+
 ]
 
 
