@@ -16,6 +16,7 @@ import {
   Loader2,
   X,
   Image as ImageIcon,
+  Trash2,
 } from 'lucide-react';
 import { removeBackground } from '@/lib/api';
 import { dispatchCompliance } from '@/lib/compliance/scanner';
@@ -53,19 +54,19 @@ const Header = () => (
 );
 
 // Tool Button Component
-const ToolButton = ({ 
-  icon: Icon, 
-  label, 
-  badge, 
-  onClick, 
-  variant = 'default', 
-  disabled = false, 
-  isLoading = false 
-}: { 
-  icon: React.ElementType; 
-  label: string; 
-  badge?: string; 
-  onClick: () => void; 
+const ToolButton = ({
+  icon: Icon,
+  label,
+  badge,
+  onClick,
+  variant = 'default',
+  disabled = false,
+  isLoading = false
+}: {
+  icon: React.ElementType;
+  label: string;
+  badge?: string;
+  onClick: () => void;
   variant?: 'default' | 'primary' | 'success' | 'warning';
   disabled?: boolean;
   isLoading?: boolean;
@@ -101,17 +102,18 @@ const ToolButton = ({
 };
 
 // Left Sidebar Component
-const LeftSidebar = ({ 
-  onUpload, 
-  onAddText, 
+const LeftSidebar = ({
+  onUpload,
+  onAddText,
   onRemoveBackground,
-  onApplyLayout1, 
-  onApplyLayout2, 
-  onCheckCompliance, 
+  onApplyLayout1,
+  onApplyLayout2,
+  onCheckCompliance,
   onExport,
   onGenerateAILayout,
+  onClear,
   hasImageSelected,
-  isProcessing 
+  isProcessing
 }: {
   onUpload: () => void;
   onAddText: () => void;
@@ -121,6 +123,7 @@ const LeftSidebar = ({
   onCheckCompliance: () => void;
   onExport: () => void;
   onGenerateAILayout: () => void;
+  onClear: () => void;
   hasImageSelected: boolean;
   isProcessing: boolean;
 }) => (
@@ -135,16 +138,17 @@ const LeftSidebar = ({
         <div className="space-y-2">
           <ToolButton icon={Upload} label="Upload Image" onClick={onUpload} variant="primary" />
           <ToolButton icon={Type} label="Add Text" onClick={onAddText} variant="default" />
-          <ToolButton 
-            icon={Eraser} 
-            label={isProcessing ? "Removing..." : "Remove Background"} 
-            variant="default" 
-            badge="AI" 
+          <ToolButton
+            icon={Eraser}
+            label={isProcessing ? "Removing..." : "Remove Background"}
+            variant="default"
+            badge="AI"
             onClick={onRemoveBackground}
             disabled={!hasImageSelected}
             isLoading={isProcessing}
           />
-          <ToolButton icon={Palette} label="Color Palette" variant="default" onClick={() => {}} />
+          <ToolButton icon={Palette} label="Color Palette" variant="default" onClick={() => { }} />
+          <ToolButton icon={Trash2} label="Clear Canvas" variant="default" onClick={onClear} />
         </div>
       </div>
 
@@ -155,17 +159,17 @@ const LeftSidebar = ({
           Smart Layouts
         </h3>
         <div className="space-y-2">
-          <ToolButton 
-            icon={Layout} 
-            label="Hero Focus" 
-            onClick={onApplyLayout1} 
+          <ToolButton
+            icon={Layout}
+            label="Hero Focus"
+            onClick={onApplyLayout1}
             variant="success"
             badge="Recommended"
           />
           <ToolButton icon={Grid} label="Split Grid" onClick={onApplyLayout2} variant="default" />
-          <ToolButton 
-            icon={Sparkles} 
-            label="AI Layout Generator" 
+          <ToolButton
+            icon={Sparkles}
+            label="AI Layout Generator"
             onClick={onGenerateAILayout}
             variant="primary"
             badge="AI"
@@ -175,10 +179,10 @@ const LeftSidebar = ({
       </div>
 
       {/* Compliance Check */}
-      <ToolButton 
-        icon={Shield} 
-        label="Run Compliance Check" 
-        onClick={onCheckCompliance} 
+      <ToolButton
+        icon={Shield}
+        label="Run Compliance Check"
+        onClick={onCheckCompliance}
         variant="warning"
       />
     </div>
@@ -322,11 +326,10 @@ const LayoutPreviewModal = ({
               {variations.map((img, idx) => (
                 <div
                   key={idx}
-                  className={`group cursor-pointer rounded-xl overflow-hidden border-2 transition-all ${
-                    selected === idx
-                      ? 'border-purple-500 shadow-xl shadow-purple-500/40'
-                      : 'border-gray-700 hover:border-purple-400'
-                  }`}
+                  className={`group cursor-pointer rounded-xl overflow-hidden border-2 transition-all ${selected === idx
+                    ? 'border-purple-500 shadow-xl shadow-purple-500/40'
+                    : 'border-gray-700 hover:border-purple-400'
+                    }`}
                   onClick={() => setSelected(idx)}
                 >
                   <div className={`${getAspectRatioClass()} bg-gray-800 flex items-center justify-center p-2`}>
@@ -370,11 +373,11 @@ const LayoutPreviewModal = ({
 };
 
 // Canvas Editor Component
-const CanvasEditor = ({ 
+const CanvasEditor = ({
   onSelectionChange,
   fabricRef,
-  canvasInstance 
-}: { 
+  canvasInstance
+}: {
   onSelectionChange: (hasSelection: boolean, meta: any) => void;
   fabricRef: React.RefObject<any>;
   canvasInstance: React.RefObject<any>;
@@ -457,7 +460,7 @@ const CanvasEditor = ({
           img.setCoords();
           canvasInstance.current.setActiveObject(img);
           canvasInstance.current.requestRenderAll();
-          
+
           selectionCallbacksRef.current(true, {
             file: file,
             url: dataUrl,
@@ -497,11 +500,11 @@ const CanvasEditor = ({
           const FabricImage = fabricRef.current.Image;
           const isRemote = dataUrl.startsWith('http');
           const newImg = await FabricImage.fromURL(dataUrl, isRemote ? { crossOrigin: 'anonymous' } : undefined);
-          newImg.set({ 
-            ...activeObj.toObject(), 
+          newImg.set({
+            ...activeObj.toObject(),
             _originalFile: file || (activeObj as any)._originalFile,
             _originalUrl: dataUrl,
-            _fileName: name || (activeObj as any)._fileName 
+            _fileName: name || (activeObj as any)._fileName
           });
           canvasInstance.current.remove(activeObj);
           canvasInstance.current.add(newImg);
@@ -563,11 +566,26 @@ const CanvasEditor = ({
         }
       };
 
+      const handleClear = () => {
+        console.log('CanvasEditor: Received clear-canvas event');
+        if (!canvasInstance.current) {
+          console.error('CanvasEditor: No canvas instance found');
+          return;
+        }
+        console.log('CanvasEditor: Clearing canvas...');
+        canvasInstance.current.clear();
+        canvasInstance.current.backgroundColor = '#ffffff';
+        canvasInstance.current.renderAll();
+        selectionCallbacksRef.current(false, null);
+        console.log('CanvasEditor: Canvas cleared.');
+      };
+
       window.addEventListener('resize', resizeCanvas);
       window.addEventListener('add-image-to-canvas', handleAddImage as EventListener);
       window.addEventListener('replace-image-on-canvas', handleReplaceImage as EventListener);
       window.addEventListener('add-text-to-canvas', handleAddText as EventListener);
       window.addEventListener('export-canvas', handleExport as EventListener);
+      window.addEventListener('clear-canvas', handleClear as EventListener);
 
       resizeCanvas();
     };
@@ -577,7 +595,7 @@ const CanvasEditor = ({
     return () => {
       mounted = false;
       if (canvasInstance.current) {
-        try { canvasInstance.current.dispose?.(); } catch {}
+        try { canvasInstance.current.dispose?.(); } catch { }
       }
     };
   }, [fabricRef, canvasInstance]);
@@ -676,8 +694,8 @@ export default function CreativeGenStudio() {
 
       const processed = await removeBackground(fileToProcess);
 
-      const base64Data = processed.startsWith('data:') 
-        ? processed.split(',')[1] 
+      const base64Data = processed.startsWith('data:')
+        ? processed.split(',')[1]
         : processed;
       const byteString = atob(base64Data);
       const arrayBuffer = new Uint8Array(byteString.length);
@@ -688,8 +706,8 @@ export default function CreativeGenStudio() {
       const newFileName = (selectedImageMeta.name?.replace(/\.[^/.]+$/, "") || 'product') + '-nobg.png';
       const newFile = new File([blob], newFileName, { type: 'image/png' });
 
-      window.dispatchEvent(new CustomEvent('replace-image-on-canvas', { 
-        detail: { dataUrl: `image/png;base64,${base64Data}`, file: newFile, name: newFileName } 
+      window.dispatchEvent(new CustomEvent('replace-image-on-canvas', {
+        detail: { dataUrl: `image/png;base64,${base64Data}`, file: newFile, name: newFileName }
       }));
       showStatus('Background removed successfully!', 'success');
     } catch (err) {
@@ -741,6 +759,14 @@ export default function CreativeGenStudio() {
 
   const handleExport = () => {
     window.dispatchEvent(new CustomEvent('export-canvas'));
+  };
+
+  const handleClear = () => {
+    console.log('Main: Dispatching clear-canvas event');
+    window.dispatchEvent(new CustomEvent('clear-canvas'));
+    setHasImageSelected(false);
+    setSelectedImageMeta(null);
+    showStatus('Canvas cleared', 'info');
   };
 
   const handleGenerateAILayout = () => {
@@ -800,7 +826,7 @@ export default function CreativeGenStudio() {
 
   const handleAILayoutSubmit = async () => {
     setAiGenerating(true);
-    
+
 
     let productFile = selectedImageMeta?.file;
     if (!productFile) {
@@ -813,16 +839,16 @@ export default function CreativeGenStudio() {
       }
     }
 
-const formData = new FormData();
-formData.append('product_image', productFile);
-if (logoFile) {
-  formData.append('logo_image', logoFile);
-}
-formData.append('product_name', aiInputs.category); 
-formData.append('primary_color', aiInputs.primaryColor);
-formData.append('text_color', aiInputs.textColor);
-formData.append('platform', aiInputs.platform);
-formData.append('num_variations', '3');
+    const formData = new FormData();
+    formData.append('product_image', productFile);
+    if (logoFile) {
+      formData.append('logo_image', logoFile);
+    }
+    formData.append('product_name', aiInputs.category);
+    formData.append('primary_color', aiInputs.primaryColor);
+    formData.append('text_color', aiInputs.textColor);
+    formData.append('platform', aiInputs.platform);
+    formData.append('num_variations', '3');
 
     try {
       const response = await fetch('http://localhost:8000/generate-layout', {
@@ -836,7 +862,7 @@ formData.append('num_variations', '3');
         try {
           const err = JSON.parse(errorText);
           msg = err.detail || msg;
-        } catch {}
+        } catch { }
         throw new Error(msg);
       }
 
@@ -866,7 +892,7 @@ formData.append('num_variations', '3');
   return (
     <div className="h-screen w-screen bg-gray-950 flex flex-col overflow-hidden">
       <Header />
-      
+
       {status && (
         <div className="px-6 pt-3">
           <StatusMessage message={status} type={statusType} />
@@ -878,17 +904,18 @@ formData.append('num_variations', '3');
           onUpload={handleUpload}
           onAddText={handleAddText}
           onRemoveBackground={handleRemoveBackground}
-          onApplyLayout1={() => {}}
-          onApplyLayout2={() => {}}
+          onApplyLayout1={() => { }}
+          onApplyLayout2={() => { }}
           onCheckCompliance={handleCompliance}
           onExport={handleExport}
           onGenerateAILayout={handleGenerateAILayout}
+          onClear={handleClear}
           hasImageSelected={hasImageSelected}
           isProcessing={isProcessing}
         />
 
         <main className="flex-1 overflow-hidden">
-          <CanvasEditor 
+          <CanvasEditor
             onSelectionChange={handleSelectionChange}
             fabricRef={fabricRef}
             canvasInstance={canvasInstance}
@@ -901,195 +928,195 @@ formData.append('num_variations', '3');
       </div>
 
       {/* AI Layout Input Modal */}
-{isAILayoutModalOpen && (
-  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-    <div className="bg-gray-900 rounded-2xl w-full max-w-md p-6 border border-gray-800">
-      <div className="flex justify-between items-center mb-4">
-        <h3 className="text-lg font-bold text-white">AI Layout Generator</h3>
-        <button 
-          onClick={() => setIsAILayoutModalOpen(false)} 
-          className="text-gray-400 hover:text-white"
-          disabled={aiGenerating} // Prevent closing during generation
-        >
-          <X className="w-5 h-5" />
-        </button>
-      </div>
-      <p className="text-sm text-gray-400 mb-6">Customize your AI-generated ad layout</p>
-      
-      
-      {!aiGenerating ? (
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm text-gray-300 mb-1">Product Name</label>
-            <input
-              type="text"
-              value={aiInputs.category}
-              onChange={(e) => setAiInputs({ ...aiInputs, category: e.target.value })}
-              className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white"
-              placeholder="e.g., shoes, perfume, Shampoo, Airpods"
-              disabled={aiGenerating}
-            />
-          </div>
-          
-<div>
-  <label className="block text-sm text-gray-300 mb-1">
-    Primary Brand Color
-  </label>
-  <div className="flex items-center gap-3">
-    
-    <div className="flex items-center gap-2">
-      <div 
-        className="w-8 h-8 rounded-md border-2 border-gray-600 cursor-pointer transition-all hover:border-purple-400"
-        style={{ backgroundColor: aiInputs.primaryColor }}
-        onClick={() => document.getElementById('primaryColorPicker')?.click()}
-        title="Click to choose color"
-      />
-      <span className="text-xs text-gray-400">Click to pick</span>
-    </div>
-    
-    
-    <input
-      id="primaryColorPicker"
-      type="color"
-      value={aiInputs.primaryColor}
-      onChange={(e) => setAiInputs({ ...aiInputs, primaryColor: e.target.value })}
-      className="w-0 h-0 opacity-0 absolute"
-      disabled={aiGenerating}
-    />
-    
-    
-    <input
-      type="text"
-      value={aiInputs.primaryColor}
-      onChange={(e) => setAiInputs({ ...aiInputs, primaryColor: e.target.value })}
-      className="flex-1 px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white"
-      disabled={aiGenerating}
-    />
-  </div>
-</div>
+      {isAILayoutModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+          <div className="bg-gray-900 rounded-2xl w-full max-w-md p-6 border border-gray-800">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-bold text-white">AI Layout Generator</h3>
+              <button
+                onClick={() => setIsAILayoutModalOpen(false)}
+                className="text-gray-400 hover:text-white"
+                disabled={aiGenerating} // Prevent closing during generation
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <p className="text-sm text-gray-400 mb-6">Customize your AI-generated ad layout</p>
 
 
-<div>
-  <label className="block text-sm text-gray-300 mb-1">
-    Text Color
-  </label>
-  <div className="flex items-center gap-3">
-    <div className="flex items-center gap-2">
-      <div 
-        className="w-8 h-8 rounded-md border-2 border-gray-600 cursor-pointer transition-all hover:border-purple-400"
-        style={{ backgroundColor: aiInputs.textColor }}
-        onClick={() => document.getElementById('textColorPicker')?.click()}
-        title="Click to choose color"
-      />
-      <span className="text-xs text-gray-400">Click to pick</span>
-    </div>
-    
-    <input
-      id="textColorPicker"
-      type="color"
-      value={aiInputs.textColor}
-      onChange={(e) => setAiInputs({ ...aiInputs, textColor: e.target.value })}
-      className="w-0 h-0 opacity-0 absolute"
-      disabled={aiGenerating}
-    />
-    
-    <input
-      type="text"
-      value={aiInputs.textColor}
-      onChange={(e) => setAiInputs({ ...aiInputs, textColor: e.target.value })}
-      className="flex-1 px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white"
-      placeholder="#ffffff"
-      disabled={aiGenerating}
-    />
-  </div>
-</div>
-          <div>
-            <label className="block text-sm text-gray-300 mb-1">Platform</label>
-            <select
-              value={aiInputs.platform}
-              onChange={(e) => setAiInputs({ ...aiInputs, platform: e.target.value })}
-              className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white"
-              disabled={aiGenerating}
-            >
-              <option value="instagram_story">Instagram Story</option>
-              <option value="instagram_square">Instagram Square</option>
-              <option value="facebook_feed">Facebook Feed</option>
-              <option value="google_display">Google Display</option>
-            </select>
-          </div>
+            {!aiGenerating ? (
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm text-gray-300 mb-1">Product Name</label>
+                  <input
+                    type="text"
+                    value={aiInputs.category}
+                    onChange={(e) => setAiInputs({ ...aiInputs, category: e.target.value })}
+                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white"
+                    placeholder="e.g., shoes, perfume, Shampoo, Airpods"
+                    disabled={aiGenerating}
+                  />
+                </div>
 
-          {/* Logo Upload */}
-          <div>
-            <label className="block text-sm text-gray-300 mb-1">Brand Logo (Optional)</label>
-            <div className="flex items-center gap-3">
-              <label className="cursor-pointer flex items-center gap-2 text-sm text-gray-400 bg-gray-800 hover:bg-gray-700 px-3 py-2 rounded-lg border border-gray-700">
-                <ImageIcon className="w-4 h-4" />
-                <span>Choose Logo</span>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0] || null;
-                    setLogoFile(file);
-                  }}
-                  className="hidden"
-                  disabled={aiGenerating}
-                />
-              </label>
-              {logoFile && (
-                <span className="text-xs text-green-400 flex items-center gap-1">
-                  <Check className="w-3 h-3" /> {logoFile.name}
-                </span>
+                <div>
+                  <label className="block text-sm text-gray-300 mb-1">
+                    Primary Brand Color
+                  </label>
+                  <div className="flex items-center gap-3">
+
+                    <div className="flex items-center gap-2">
+                      <div
+                        className="w-8 h-8 rounded-md border-2 border-gray-600 cursor-pointer transition-all hover:border-purple-400"
+                        style={{ backgroundColor: aiInputs.primaryColor }}
+                        onClick={() => document.getElementById('primaryColorPicker')?.click()}
+                        title="Click to choose color"
+                      />
+                      <span className="text-xs text-gray-400">Click to pick</span>
+                    </div>
+
+
+                    <input
+                      id="primaryColorPicker"
+                      type="color"
+                      value={aiInputs.primaryColor}
+                      onChange={(e) => setAiInputs({ ...aiInputs, primaryColor: e.target.value })}
+                      className="w-0 h-0 opacity-0 absolute"
+                      disabled={aiGenerating}
+                    />
+
+
+                    <input
+                      type="text"
+                      value={aiInputs.primaryColor}
+                      onChange={(e) => setAiInputs({ ...aiInputs, primaryColor: e.target.value })}
+                      className="flex-1 px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white"
+                      disabled={aiGenerating}
+                    />
+                  </div>
+                </div>
+
+
+                <div>
+                  <label className="block text-sm text-gray-300 mb-1">
+                    Text Color
+                  </label>
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2">
+                      <div
+                        className="w-8 h-8 rounded-md border-2 border-gray-600 cursor-pointer transition-all hover:border-purple-400"
+                        style={{ backgroundColor: aiInputs.textColor }}
+                        onClick={() => document.getElementById('textColorPicker')?.click()}
+                        title="Click to choose color"
+                      />
+                      <span className="text-xs text-gray-400">Click to pick</span>
+                    </div>
+
+                    <input
+                      id="textColorPicker"
+                      type="color"
+                      value={aiInputs.textColor}
+                      onChange={(e) => setAiInputs({ ...aiInputs, textColor: e.target.value })}
+                      className="w-0 h-0 opacity-0 absolute"
+                      disabled={aiGenerating}
+                    />
+
+                    <input
+                      type="text"
+                      value={aiInputs.textColor}
+                      onChange={(e) => setAiInputs({ ...aiInputs, textColor: e.target.value })}
+                      className="flex-1 px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white"
+                      placeholder="#ffffff"
+                      disabled={aiGenerating}
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm text-gray-300 mb-1">Platform</label>
+                  <select
+                    value={aiInputs.platform}
+                    onChange={(e) => setAiInputs({ ...aiInputs, platform: e.target.value })}
+                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white"
+                    disabled={aiGenerating}
+                  >
+                    <option value="instagram_story">Instagram Story</option>
+                    <option value="instagram_square">Instagram Square</option>
+                    <option value="facebook_feed">Facebook Feed</option>
+                    <option value="google_display">Google Display</option>
+                  </select>
+                </div>
+
+                {/* Logo Upload */}
+                <div>
+                  <label className="block text-sm text-gray-300 mb-1">Brand Logo (Optional)</label>
+                  <div className="flex items-center gap-3">
+                    <label className="cursor-pointer flex items-center gap-2 text-sm text-gray-400 bg-gray-800 hover:bg-gray-700 px-3 py-2 rounded-lg border border-gray-700">
+                      <ImageIcon className="w-4 h-4" />
+                      <span>Choose Logo</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0] || null;
+                          setLogoFile(file);
+                        }}
+                        className="hidden"
+                        disabled={aiGenerating}
+                      />
+                    </label>
+                    {logoFile && (
+                      <span className="text-xs text-green-400 flex items-center gap-1">
+                        <Check className="w-3 h-3" /> {logoFile.name}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">PNG with transparency recommended</p>
+                </div>
+              </div>
+            ) : (
+              /* PROCESSING STATE */
+              <div className="flex flex-col items-center justify-center py-8">
+                <Loader2 className="w-10 h-10 text-purple-500 animate-spin mb-4" />
+                <h3 className="text-white font-medium">Generating layouts...</h3>
+                <p className="text-gray-400 text-sm mt-1 text-center">
+                  Creating 3 unique designs for "{aiInputs.category || 'your product'}"
+                </p>
+              </div>
+            )}
+
+            {/* Buttons */}
+            <div className="flex justify-end gap-3 mt-6">
+              {!aiGenerating ? (
+                <>
+                  <button
+                    onClick={() => {
+                      setIsAILayoutModalOpen(false);
+                      setLogoFile(null);
+                    }}
+                    className="px-4 py-2 text-gray-300 hover:bg-gray-800 rounded-lg"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleAILayoutSubmit}
+                    disabled={aiGenerating}
+                    className="px-4 py-2 bg-gradient-to-r from-purple-500 to-fuchsia-500 text-white rounded-lg font-medium flex items-center gap-2"
+                  >
+                    Generate Layouts
+                  </button>
+                </>
+              ) : (
+                /* Disable all actions during processing */
+                <button
+                  disabled
+                  className="px-6 py-2 bg-gray-800 text-gray-500 rounded-lg cursor-not-allowed"
+                >
+                  Please wait...
+                </button>
               )}
             </div>
-            <p className="text-xs text-gray-500 mt-1">PNG with transparency recommended</p>
           </div>
         </div>
-      ) : (
-        /* PROCESSING STATE */
-        <div className="flex flex-col items-center justify-center py-8">
-          <Loader2 className="w-10 h-10 text-purple-500 animate-spin mb-4" />
-          <h3 className="text-white font-medium">Generating layouts...</h3>
-          <p className="text-gray-400 text-sm mt-1 text-center">
-            Creating 3 unique designs for "{aiInputs.category || 'your product'}"
-          </p>
-        </div>
       )}
-
-      {/* Buttons */}
-      <div className="flex justify-end gap-3 mt-6">
-        {!aiGenerating ? (
-          <>
-            <button
-              onClick={() => {
-                setIsAILayoutModalOpen(false);
-                setLogoFile(null);
-              }}
-              className="px-4 py-2 text-gray-300 hover:bg-gray-800 rounded-lg"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleAILayoutSubmit}
-              disabled={aiGenerating}
-              className="px-4 py-2 bg-gradient-to-r from-purple-500 to-fuchsia-500 text-white rounded-lg font-medium flex items-center gap-2"
-            >
-              Generate Layouts
-            </button>
-          </>
-        ) : (
-          /* Disable all actions during processing */
-          <button
-            disabled
-            className="px-6 py-2 bg-gray-800 text-gray-500 rounded-lg cursor-not-allowed"
-          >
-            Please wait...
-          </button>
-        )}
-      </div>
-    </div>
-  </div>
-)}
       {/* Preview Modal */}
       <LayoutPreviewModal
         isOpen={isPreviewOpen}

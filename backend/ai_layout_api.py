@@ -19,7 +19,9 @@ from PIL import Image, ImageDraw, ImageFont
 # SETUP
 
 load_dotenv()
-GROQ_API_KEY = "Your api key"
+
+
+GROQ_API_KEY = "your groq api key"
 
 
 if GROQ_API_KEY:
