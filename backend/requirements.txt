@@ -3,3 +3,5 @@ uvicorn
 pillow
 python-multipart
 groq
+python-dotenv==1.0.1
+ 
