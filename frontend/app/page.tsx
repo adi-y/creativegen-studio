@@ -18,7 +18,10 @@ import {
   Image as ImageIcon,
 } from 'lucide-react';
 import { removeBackground } from '@/lib/api';
-import { ChromePicker } from 'react-color';
+import { dispatchCompliance } from '@/lib/compliance/scanner';
+import { extractTextFromImage } from '@/lib/ocr';
+ 
+
 // Modern Header Component
 const Header = () => (
   <header className="h-16 border-b border-gray-800 bg-gradient-to-r from-gray-900 via-purple-900/20 to-gray-900 backdrop-blur-xl flex items-center justify-between px-6 sticky top-0 z-50">
@@ -460,6 +463,25 @@ const CanvasEditor = ({
             url: dataUrl,
             name: name || file?.name,
           });
+
+          // Run OCR on the uploaded image asynchronously
+          (async () => {
+            try {
+              console.log('Running OCR on uploaded image...');
+              const ocrText = await extractTextFromImage(dataUrl);
+              (img as any)._ocrText = ocrText;
+              if (ocrText) {
+                console.log('OCR extracted text from image:', ocrText);
+                window.dispatchEvent(new CustomEvent('image-text-extracted', { 
+                  detail: { text: ocrText } 
+                }));
+              } else {
+                console.log('No text found in image');
+              }
+            } catch (ocrError) {
+              console.error('OCR failed:', ocrError);
+            }
+          })();
         } catch (error) {
           console.error('Error adding image:', error);
         }
@@ -584,6 +606,7 @@ export default function CreativeGenStudio() {
   const [aiGenerating, setAiGenerating] = useState(false);
   const [layoutVariations, setLayoutVariations] = useState<string[]>([]);
   const [logoFile, setLogoFile] = useState<File | null>(null); //  new state
+  const [isScanning, setIsScanning] = useState(false);
   const fabricRef = useRef<any>(null);
   const canvasInstance = useRef<any>(null);
 
@@ -677,15 +700,43 @@ export default function CreativeGenStudio() {
   };
 
   const handleCompliance = () => {
-    window.dispatchEvent(new CustomEvent('compliance-result', {
-      detail: {
-        issues: 2,
-        list: [
-          'Text covers 34% of image (Meta limit: 20%)',
-          'Contains "Lose weight fast" claim → prohibited',
-        ],
-      },
-    }));
+    if (!canvasInstance.current) {
+      showStatus('No canvas content to check', 'error');
+      return;
+    }
+
+    try {
+      const canvas = canvasInstance.current;
+      const objects = canvas.getObjects();
+      
+      // Extract text from textbox objects
+      const textboxText = objects
+        .filter((obj: any) => obj.type === 'textbox' || obj.type === 'text')
+        .map((obj: any) => obj.text || '')
+        .join(' ');
+
+      // Extract OCR text from image objects
+      const ocrText = objects
+        .filter((obj: any) => obj.type === 'image')
+        .map((obj: any) => (obj as any)._ocrText || '')
+        .join(' ');
+
+      // Combine all text
+      const allText = `${textboxText} ${ocrText}`.trim();
+
+      if (!allText) {
+        showStatus('No text found to check', 'info');
+        return;
+      }
+
+      // Use the dispatchCompliance helper (handles scan + dispatch)
+      dispatchCompliance(allText);
+      
+      showStatus('Compliance check complete', 'info');
+    } catch (err) {
+      console.error('Compliance check error:', err);
+      showStatus('Compliance check failed', 'error');
+    }
   };
 
   const handleExport = () => {
