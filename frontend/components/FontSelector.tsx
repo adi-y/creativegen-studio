@@ -7,7 +7,7 @@ interface FontSelectorProps {
   onFontChange: (fontFamily: string) => void;
 }
 
-export const FontSelector: React.FC<FontSelectorProps> = ({ currentFont, onFontChange }) => {
+const FontSelector: React.FC<FontSelectorProps> = ({ currentFont, onFontChange }) => {
   // Strip extra quotes if present
   const cleanFont = currentFont.replace(/['"]/g, '');
 
@@ -38,3 +38,5 @@ export const FontSelector: React.FC<FontSelectorProps> = ({ currentFont, onFontC
     </div>
   );
 };
+
+export default FontSelector;

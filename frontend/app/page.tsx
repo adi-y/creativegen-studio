@@ -21,7 +21,7 @@ import {
 import { removeBackground } from '@/lib/api';
 import { dispatchCompliance } from '@/lib/compliance/scanner';
 import { extractTextFromImage } from '@/lib/ocr';
-import { FontSelector } from '@/components/FontSelector';
+import FontSelector from '@/components/FontSelector';
 import { loadGoogleFont } from '@/lib/fonts';
  
 
