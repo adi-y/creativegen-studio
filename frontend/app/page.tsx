@@ -23,6 +23,7 @@ import { dispatchCompliance } from '@/lib/compliance/scanner';
 import { extractTextFromImage } from '@/lib/ocr';
 import FontSelector from '@/components/FontSelector';
 import { loadGoogleFont } from '@/lib/fonts';
+import { ColorPalette } from '@/components/ColorPalette';
  
 
 // Modern Header Component
@@ -108,7 +109,10 @@ const LeftSidebar = ({
   hasImageSelected,
   isProcessing,
   selectedObjectType,
-  onChangeFont
+  onChangeFont,
+  showColorPalette,
+  onToggleColorPalette,
+  onColorSelect
 }: {
   onUpload: () => void;
   onAddText: () => void;
@@ -123,6 +127,9 @@ const LeftSidebar = ({
   isProcessing: boolean;
   selectedObjectType?: string | null;
   onChangeFont?: () => void;
+  showColorPalette: boolean;
+  onToggleColorPalette: () => void;
+  onColorSelect: (color: string) => void;
 }) => (
   <aside className="w-80 bg-gradient-to-b from-gray-900 via-gray-900 to-purple-900/10 border-r border-gray-800 flex flex-col">
     <div className="flex-1 overflow-y-auto p-6 space-y-8">
@@ -156,7 +163,8 @@ const LeftSidebar = ({
             disabled={!hasImageSelected}
             isLoading={isProcessing}
           />
-          <ToolButton icon={Palette} label="Color Palette" variant="default" onClick={() => { }} />
+          <ToolButton icon={Palette} label="Color Palette" variant="default" onClick={onToggleColorPalette} />
+          {showColorPalette && <ColorPalette onColorSelect={onColorSelect} />}
           <ToolButton icon={Trash2} label="Clear Canvas" variant="default" onClick={onClear} />
         </div>
       </div>
@@ -649,6 +657,7 @@ export default function CreativeGenStudio() {
   const [layoutVariations, setLayoutVariations] = useState<string[]>([]);
   const [logoFile, setLogoFile] = useState<File | null>(null); //  new state
   const [isScanning, setIsScanning] = useState(false);
+  const [showColorPalette, setShowColorPalette] = useState(false); // Color palette toggle
   const fabricRef = useRef<any>(null);
   const canvasInstance = useRef<any>(null);
 
@@ -959,6 +968,36 @@ export default function CreativeGenStudio() {
     setShowFontSelector(!showFontSelector);
   };
 
+  const toggleColorPalette = () => {
+    setShowColorPalette(!showColorPalette);
+  };
+
+  const handleColorChange = (color: string) => {
+    if (!canvasInstance.current) {
+      showStatus('No canvas available', 'error');
+      return;
+    }
+
+    const activeObj = canvasInstance.current.getActiveObject();
+    if (!activeObj) {
+      showStatus('Please select an object on canvas first', 'info');
+      return;
+    }
+
+    // Apply color to the selected object
+    if (activeObj.type === 'textbox' || activeObj.type === 'text') {
+      activeObj.set('fill', color);
+    } else if (activeObj.type === 'rect' || activeObj.type === 'circle' || activeObj.type === 'triangle') {
+      activeObj.set('fill', color);
+    } else {
+      showStatus('Selected object does not support color change', 'info');
+      return;
+    }
+
+    canvasInstance.current.requestRenderAll();
+
+  };
+
   return (
     <div className="h-screen w-screen bg-gray-950 flex flex-col overflow-hidden">
       <Header />
@@ -984,6 +1023,9 @@ export default function CreativeGenStudio() {
           isProcessing={isProcessing}
           selectedObjectType={selectedTextMeta ? 'text' : (hasImageSelected ? 'image' : null)}
           onChangeFont={toggleFontPanel}
+          showColorPalette={showColorPalette}
+          onToggleColorPalette={toggleColorPalette}
+          onColorSelect={handleColorChange}
         />
 
         <main className="flex-1 overflow-hidden relative">

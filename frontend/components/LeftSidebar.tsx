@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { Upload, Type, Layout, Grid, Shield, Download, Image, Palette, Wand2, Info, Loader2, Sparkles } from 'lucide-react';
 
+import { ColorPalette } from './ColorPalette';
+
 type LeftSidebarProps = {
   onUpload?: () => void;
   onAddText?: () => void;
@@ -16,6 +18,9 @@ type LeftSidebarProps = {
   hasImageSelected?: boolean;
   selectedObjectType?: string | null;
   onChangeFont?: () => void;
+  showColorPalette: boolean;
+  onToggleColorPalette: () => void;
+  onColorSelect: (color: string) => void;
 };
 
 export default function LeftSidebar({
@@ -31,6 +36,9 @@ export default function LeftSidebar({
   hasImageSelected = false,
   selectedObjectType = null,
   onChangeFont,
+  showColorPalette,
+  onToggleColorPalette,
+  onColorSelect
 }: LeftSidebarProps) {
   const [showBgInfo, setShowBgInfo] = useState(false);
 
@@ -118,7 +126,7 @@ export default function LeftSidebar({
             )}
 
             <button
-              onClick={() => {}}
+              onClick={onToggleColorPalette}
               className="w-full flex items-center gap-3 px-4 py-3 bg-gray-800/70 hover:bg-gray-700 border border-gray-700 rounded-xl text-left font-medium transition-all duration-200 group"
             >
               <div className="p-2 rounded-lg bg-gray-900/50 group-hover:bg-gray-900 transition-colors">
@@ -126,6 +134,7 @@ export default function LeftSidebar({
               </div>
               <span className="text-sm text-gray-200">Color Palette</span>
             </button>
+            {showColorPalette && <ColorPalette onColorSelect={onColorSelect} />}
           </div>
         </div>
 
