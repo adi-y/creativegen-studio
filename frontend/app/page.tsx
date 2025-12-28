@@ -21,6 +21,8 @@ import {
 import { removeBackground } from '@/lib/api';
 import { dispatchCompliance } from '@/lib/compliance/scanner';
 import { extractTextFromImage } from '@/lib/ocr';
+import { FontSelector } from '@/components/FontSelector';
+import { loadGoogleFont } from '@/lib/fonts';
  
 
 // Modern Header Component
@@ -40,15 +42,6 @@ const Header = () => (
           AI-Powered Creative Builder
         </p>
       </div>
-    </div>
-
-    <div className="flex items-center gap-3">
-      <button className="px-4 py-2 rounded-lg border border-gray-700 bg-gray-800/50 text-gray-300 hover:bg-gray-700 hover:border-gray-600 transition-all duration-200 text-sm font-medium backdrop-blur-sm">
-        Settings
-      </button>
-      <button className="px-5 py-2 rounded-lg bg-gradient-to-r from-purple-500 to-fuchsia-500 text-white font-semibold hover:from-purple-400 hover:to-fuchsia-400 transition-all duration-200 shadow-lg shadow-purple-500/50">
-        Upload Assets
-      </button>
     </div>
   </header>
 );
@@ -113,7 +106,9 @@ const LeftSidebar = ({
   onGenerateAILayout,
   onClear,
   hasImageSelected,
-  isProcessing
+  isProcessing,
+  selectedObjectType,
+  onChangeFont
 }: {
   onUpload: () => void;
   onAddText: () => void;
@@ -126,6 +121,8 @@ const LeftSidebar = ({
   onClear: () => void;
   hasImageSelected: boolean;
   isProcessing: boolean;
+  selectedObjectType?: string | null;
+  onChangeFont?: () => void;
 }) => (
   <aside className="w-80 bg-gradient-to-b from-gray-900 via-gray-900 to-purple-900/10 border-r border-gray-800 flex flex-col">
     <div className="flex-1 overflow-y-auto p-6 space-y-8">
@@ -138,6 +135,18 @@ const LeftSidebar = ({
         <div className="space-y-2">
           <ToolButton icon={Upload} label="Upload Image" onClick={onUpload} variant="primary" />
           <ToolButton icon={Type} label="Add Text" onClick={onAddText} variant="default" />
+          
+          <button
+              onClick={onChangeFont}
+              disabled={selectedObjectType !== 'text'}
+              className="w-full flex items-center gap-3 px-4 py-3 bg-gray-800/70 hover:bg-gray-700 border border-gray-700 rounded-xl text-left font-medium transition-all duration-200 group disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <div className="p-2 rounded-lg bg-gray-900/50 group-hover:bg-gray-900 transition-colors">
+                 <Type className="w-4 h-4 text-gray-300 group-hover:text-white" />
+              </div>
+              <span className="text-sm text-gray-200">Font Family</span>
+            </button>
+
           <ToolButton
             icon={Eraser}
             label={isProcessing ? "Removing..." : "Remove Background"}
@@ -418,9 +427,16 @@ const CanvasEditor = ({
         const obj = e.selected?.[0];
         if (obj?.type === 'image') {
           selectionCallbacksRef.current(true, {
+            type: 'image',
             file: (obj as any)._originalFile,
             url: (obj as any)._originalUrl,
             name: (obj as any)._fileName,
+          });
+        } else if (obj?.type === 'textbox' || obj?.type === 'text') {
+          selectionCallbacksRef.current(true, {
+            type: 'text',
+            text: obj.text,
+            fontFamily: obj.fontFamily
           });
         } else {
           selectionCallbacksRef.current(false, null);
@@ -520,7 +536,7 @@ const CanvasEditor = ({
         if (!canvasInstance.current || !fabricRef.current) return;
         const text = new fabricRef.current.Textbox('Double tap to edit', {
           left: 1080 / 2,
-          top: 1920 * 0.3,
+          top: 1920 / 2,
           fontSize: 80,
           fill: '#000000',
           fontFamily: 'Impact, Arial Black, sans-serif',
@@ -534,6 +550,12 @@ const CanvasEditor = ({
         canvasInstance.current.add(text);
         canvasInstance.current.setActiveObject(text);
         canvasInstance.current.renderAll();
+
+        selectionCallbacksRef.current(true, {
+          type: 'text',
+          text: text.text,
+          fontFamily: text.fontFamily
+        });
       };
 
       const handleExport = () => {
@@ -616,6 +638,8 @@ const CanvasEditor = ({
 export default function CreativeGenStudio() {
   const [hasImageSelected, setHasImageSelected] = useState(false);
   const [selectedImageMeta, setSelectedImageMeta] = useState<any>(null);
+  const [selectedTextMeta, setSelectedTextMeta] = useState<any>(null); // New state for text
+  const [showFontSelector, setShowFontSelector] = useState(false); // Toggle for font panel
   const [isProcessing, setIsProcessing] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
   const [statusType, setStatusType] = useState<'success' | 'error' | 'info'>('info');
@@ -889,6 +913,52 @@ export default function CreativeGenStudio() {
     showStatus('Layout downloaded!', 'success');
   };
 
+  const handleTextSelection = useCallback((hasSelection: boolean, meta: any) => {
+    if (hasSelection && meta?.type === 'text') {
+      console.log('Selection: Text selected', meta);
+      setSelectedTextMeta(meta);
+      // Reset image selection
+      setHasImageSelected(false);
+      setSelectedImageMeta(null);
+    } else if (hasSelection && meta?.type === 'image') {
+      console.log('Selection: Image selected');
+      setHasImageSelected(true);
+      setSelectedImageMeta(meta);
+      // Reset text selection
+      setSelectedTextMeta(null);
+    } else {
+      console.log('Selection: None');
+      setHasImageSelected(false);
+      setSelectedImageMeta(null);
+      setSelectedTextMeta(null);
+    }
+  }, []);
+
+  const handleFontChange = (newFont: string) => {
+    console.log('Font change requested:', newFont);
+    if (!canvasInstance.current) return;
+    
+    // Load font
+    loadGoogleFont(newFont);
+    
+    const activeObj = canvasInstance.current.getActiveObject();
+    if (activeObj && (activeObj.type === 'textbox' || activeObj.type === 'text')) {
+      activeObj.set('fontFamily', newFont);
+      canvasInstance.current.requestRenderAll();
+      
+      // Update local state
+      setSelectedTextMeta((prev: any) => ({
+        ...prev,
+        fontFamily: newFont
+      }));
+    }
+  };
+
+  const toggleFontPanel = () => {
+    console.log('Toggling font panel. Current state:', showFontSelector);
+    setShowFontSelector(!showFontSelector);
+  };
+
   return (
     <div className="h-screen w-screen bg-gray-950 flex flex-col overflow-hidden">
       <Header />
@@ -912,14 +982,35 @@ export default function CreativeGenStudio() {
           onClear={handleClear}
           hasImageSelected={hasImageSelected}
           isProcessing={isProcessing}
+          selectedObjectType={selectedTextMeta ? 'text' : (hasImageSelected ? 'image' : null)}
+          onChangeFont={toggleFontPanel}
         />
 
-        <main className="flex-1 overflow-hidden">
+        <main className="flex-1 overflow-hidden relative">
           <CanvasEditor
-            onSelectionChange={handleSelectionChange}
+            onSelectionChange={handleTextSelection}
             fabricRef={fabricRef}
             canvasInstance={canvasInstance}
           />
+          
+          {/* Floating Text Properties Panel */}
+          {selectedTextMeta && showFontSelector && (
+            <div className="absolute top-4 right-4 p-4 bg-gray-900/90 backdrop-blur-md border border-gray-700 rounded-xl shadow-xl w-64 animate-in fade-in slide-in-from-right-4 z-10">
+              <div className="flex justify-between items-center mb-3">
+                <h3 className="text-sm font-bold text-white">Text Properties</h3>
+                <button 
+                  onClick={() => setSelectedTextMeta(null)}
+                  className="text-gray-400 hover:text-white"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+              <FontSelector 
+                currentFont={selectedTextMeta.fontFamily || 'Arial'} 
+                onFontChange={handleFontChange} 
+              />
+            </div>
+          )}
         </main>
 
         <aside className="w-80 bg-gray-900 border-l border-gray-800 p-6 overflow-y-auto">

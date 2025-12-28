@@ -15,6 +15,7 @@ type LeftSidebarProps = {
   isProcessing?: boolean;
   hasImageSelected?: boolean;
   selectedObjectType?: string | null;
+  onChangeFont?: () => void;
 };
 
 export default function LeftSidebar({
@@ -29,6 +30,7 @@ export default function LeftSidebar({
   isProcessing = false,
   hasImageSelected = false,
   selectedObjectType = null,
+  onChangeFont,
 }: LeftSidebarProps) {
   const [showBgInfo, setShowBgInfo] = useState(false);
 
@@ -61,6 +63,17 @@ export default function LeftSidebar({
                 <Type className="w-4 h-4 text-gray-300 group-hover:text-white" />
               </div>
               <span className="text-sm text-gray-200">Add Text</span>
+            </button>
+
+            <button
+              onClick={onChangeFont}
+              disabled={selectedObjectType !== 'text'}
+              className="w-full flex items-center gap-3 px-4 py-3 bg-gray-800/70 hover:bg-gray-700 border border-gray-700 rounded-xl text-left font-medium transition-all duration-200 group disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <div className="p-2 rounded-lg bg-gray-900/50 group-hover:bg-gray-900 transition-colors">
+                 <Type className="w-4 h-4 text-gray-300 group-hover:text-white" />
+              </div>
+              <span className="text-sm text-gray-200">Font Family</span>
             </button>
 
             {/* Background Removal with Info */}
