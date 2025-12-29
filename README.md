@@ -3,24 +3,46 @@
 Monorepo for AI-powered ad creative builder.
 
 ## Structure
+
 - `frontend/` — Next.js + Fabric.js UI
 - `backend/` — FastAPI microservices (upload, background removal, layout, compliance)
 
 ## How to Run
 
 ### Frontend
-cd frontend  
-npm install  
-npm run dev  
+```bash
+cd frontend
+npm install
+npm run dev
+```
 
 ### Backend
-cd backend  
-pip install -r requirements.txt  
-uvicorn ai_layout_api:app --reload
+```bash
+cd backend
+pip install -r requirements.txt
 
-### Steps to setup Groq API
+# Run AI Layout API
+uvicorn ai_layout_api:app --reload --port 8000
 
-1) Go to https://console.groq.com/home
-2) Create account → API Keys → Create Key
-3) Paste key into backend/.env
+# Run Background Removal API (in another terminal)
+uvicorn background_removal_api:app --reload --port 8001
+```
 
+## Setup
+
+### Groq API Configuration
+
+1. Go to [Groq Console](https://console.groq.com/home)
+2. Create account → **API Keys** → **Create Key**
+3. Create `backend/.env` file:
+```bash
+   GROQ_API_KEY=your_api_key_here
+```
+
+
+
+## Tech Stack
+
+- **Frontend:** Next.js, React, Fabric.js, TailwindCSS
+- **Backend:** FastAPI, Python, Groq AI, Background Removal AI
+- **APIs:** AI Layout Generation, Background Removal, Compliance Scanning
