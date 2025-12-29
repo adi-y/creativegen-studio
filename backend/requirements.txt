@@ -1,7 +1,11 @@
 fastapi
-uvicorn
+uvicorn[standard]
 pillow
 python-multipart
 groq
 python-dotenv==1.0.1
- 
+numpy
+onnxruntime
+pooch
+tqdm
+rembg

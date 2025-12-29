@@ -641,7 +641,7 @@ export default function CreativeGenStudio() {
     setTimeout(() => {
       setStatus(null);
       setStatusType('info');
-    }, 3000);
+    }, 1500);
   };
 
   const handleSelectionChange = useCallback((hasSelection: boolean, meta: any) => {
@@ -707,7 +707,7 @@ export default function CreativeGenStudio() {
       const newFile = new File([blob], newFileName, { type: 'image/png' });
 
       window.dispatchEvent(new CustomEvent('replace-image-on-canvas', {
-        detail: { dataUrl: `image/png;base64,${base64Data}`, file: newFile, name: newFileName }
+        detail: { dataUrl: `data:image/png;base64,${base64Data}`, file: newFile, name: newFileName }
       }));
       showStatus('Background removed successfully!', 'success');
     } catch (err) {
