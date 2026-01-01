@@ -44,5 +44,5 @@ uvicorn background_removal_api:app --reload --port 8001
 ## Tech Stack
 
 - **Frontend:** Next.js, React, Fabric.js, TailwindCSS
-- **Backend:** FastAPI, Python, Groq AI, Background Removal AI
+- **Backend:** FastAPI, Python, Groq API (OpenAI gpt-oss-120b), Background Removal AI: rembg (U²-Net ONNX)
 - **APIs:** AI Layout Generation, Background Removal, Compliance Scanning
