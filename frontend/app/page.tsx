@@ -42,14 +42,7 @@ const Header = () => (
       </div>
     </div>
 
-    <div className="flex items-center gap-3">
-      <button className="px-4 py-2 rounded-lg border border-gray-700 bg-gray-800/50 text-gray-300 hover:bg-gray-700 hover:border-gray-600 transition-all duration-200 text-sm font-medium backdrop-blur-sm">
-        Settings
-      </button>
-      <button className="px-5 py-2 rounded-lg bg-gradient-to-r from-purple-500 to-fuchsia-500 text-white font-semibold hover:from-purple-400 hover:to-fuchsia-400 transition-all duration-200 shadow-lg shadow-purple-500/50">
-        Upload Assets
-      </button>
-    </div>
+    
   </header>
 );
 
@@ -159,14 +152,6 @@ const LeftSidebar = ({
           Smart Layouts
         </h3>
         <div className="space-y-2">
-          <ToolButton
-            icon={Layout}
-            label="Hero Focus"
-            onClick={onApplyLayout1}
-            variant="success"
-            badge="Recommended"
-          />
-          <ToolButton icon={Grid} label="Split Grid" onClick={onApplyLayout2} variant="default" />
           <ToolButton
             icon={Sparkles}
             label="AI Layout Generator"
