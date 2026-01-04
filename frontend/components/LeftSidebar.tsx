@@ -1,17 +1,37 @@
 "use client";
 
-import { useState } from 'react';
-import { Upload, Type, Layout, Grid, Shield, Download, Image, Palette, Wand2, Info, Loader2, Sparkles } from 'lucide-react';
+import { useState } from "react";
+import {
+  Upload,
+  Type,
+  Layout,
+  Grid,
+  Shield,
+  Download,
+  Image,
+  Palette,
+  Wand2,
+  Info,
+  Loader2,
+  Sparkles,
+  ChevronDown,
+} from "lucide-react";
+import { GOOGLE_FONTS } from "@/lib/fonts";
+import { PREMIUM_COLORS } from "@/lib/colors";
+
+import ToolButton from "./ToolButton";
+import { Eraser, Trash2 } from "lucide-react";
 
 type LeftSidebarProps = {
   onUpload?: () => void;
   onAddText?: () => void;
   onRemoveBackground?: () => void;
-  onApplyLayout1?: () => void;
-  onApplyLayout2?: () => void;
   onCheckCompliance?: () => void;
   onExport?: () => void;
   onGenerateAILayout?: () => void;
+  onClear?: () => void;
+  onChangeFont?: (font: string) => void;
+  onChangeColor?: (color: string) => void;
   isProcessing?: boolean;
   hasImageSelected?: boolean;
   selectedObjectType?: string | null;
@@ -20,12 +40,13 @@ type LeftSidebarProps = {
 export default function LeftSidebar({
   onUpload,
   onAddText,
+  onChangeFont,
   onRemoveBackground,
-  onApplyLayout1,
-  onApplyLayout2,
   onCheckCompliance,
   onExport,
   onGenerateAILayout,
+  onClear,
+  onChangeColor,
   isProcessing = false,
   hasImageSelected = false,
   selectedObjectType = null,
@@ -43,47 +64,30 @@ export default function LeftSidebar({
             Creative Tools
           </h3>
           <div className="space-y-2">
-            <button
-              onClick={onUpload}
-              className="w-full flex items-center gap-3 px-4 py-3 bg-gradient-to-br from-purple-500/10 to-fuchsia-500/10 hover:from-purple-500/20 hover:to-fuchsia-500/20 border border-purple-500/30 rounded-xl text-left font-medium transition-all duration-200 group"
-            >
-              <div className="p-2 rounded-lg bg-gray-900/50 group-hover:bg-gray-900 transition-colors">
-                <Upload className="w-4 h-4 text-gray-300 group-hover:text-white" />
-              </div>
-              <span className="text-sm text-gray-200">Upload Image</span>
-            </button>
-
-            <button
-              onClick={onAddText}
-              className="w-full flex items-center gap-3 px-4 py-3 bg-gray-800/70 hover:bg-gray-700 border border-gray-700 rounded-xl text-left font-medium transition-all duration-200 group"
-            >
-              <div className="p-2 rounded-lg bg-gray-900/50 group-hover:bg-gray-900 transition-colors">
-                <Type className="w-4 h-4 text-gray-300 group-hover:text-white" />
-              </div>
-              <span className="text-sm text-gray-200">Add Text</span>
-            </button>
+            <ToolButton
+              icon={Upload}
+              label="Upload Image"
+              onClick={onUpload || (() => {})}
+              variant="primary"
+            />
+            <ToolButton
+              icon={Type}
+              label="Add Text"
+              onClick={onAddText || (() => {})}
+              variant="default"
+            />
 
             {/* Background Removal with Info */}
             <div className="relative">
-              <button
-                onClick={onRemoveBackground}
+              <ToolButton
+                icon={Eraser}
+                label={isProcessing ? "Removing..." : "Remove Background"}
+                variant="default"
+                badge="AI"
+                onClick={onRemoveBackground || (() => {})}
                 disabled={!hasImageSelected || isProcessing}
-                className="w-full flex items-center gap-3 px-4 py-3 bg-gray-800/70 hover:bg-gray-700 border border-gray-700 rounded-xl text-left font-medium transition-all duration-200 group disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <div className="p-2 rounded-lg bg-gray-900/50 group-hover:bg-gray-900 transition-colors">
-                  {isProcessing ? (
-                    <Loader2 className="w-4 h-4 text-gray-300 animate-spin" />
-                  ) : (
-                    <Image className="w-4 h-4 text-gray-300 group-hover:text-white" />
-                  )}
-                </div>
-                <span className="text-sm text-gray-200">
-                  {isProcessing ? 'Removing...' : 'Remove Background'}
-                </span>
-                <span className="ml-auto text-xs bg-purple-500/20 text-purple-300 px-2 py-1 rounded-md border border-purple-500/30">
-                  AI
-                </span>
-              </button>
+                isLoading={isProcessing}
+              />
               <button
                 onClick={() => setShowBgInfo(!showBgInfo)}
                 className="absolute top-3 right-3 p-1 hover:bg-gray-700 rounded-lg transition-colors z-10"
@@ -93,8 +97,10 @@ export default function LeftSidebar({
             </div>
 
             {showBgInfo && (
-              <div className="p-3 bg-blue-500/5 border border-blue-500/20 rounded-lg">
-                <p className="text-xs text-blue-300 font-medium mb-2">How to use:</p>
+              <div className="p-3 bg-blue-500/5 border border-blue-500/20 rounded-lg animate-in fade-in slide-in-from-top-2 duration-200">
+                <p className="text-xs text-blue-300 font-medium mb-2">
+                  How to use:
+                </p>
                 <ol className="text-xs text-gray-400 space-y-1 list-decimal list-inside">
                   <li>Upload an image</li>
                   <li>Select the image on canvas</li>
@@ -104,17 +110,79 @@ export default function LeftSidebar({
               </div>
             )}
 
-            <button
-              onClick={() => {}}
-              className="w-full flex items-center gap-3 px-4 py-3 bg-gray-800/70 hover:bg-gray-700 border border-gray-700 rounded-xl text-left font-medium transition-all duration-200 group"
-            >
-              <div className="p-2 rounded-lg bg-gray-900/50 group-hover:bg-gray-900 transition-colors">
-                <Palette className="w-4 h-4 text-gray-300 group-hover:text-white" />
+            <div className="pt-2">
+              <h4 className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-3 flex items-center gap-2 px-1">
+                <Palette className="w-3 h-3" />
+                Color Palette
+              </h4>
+              <div className="grid grid-cols-6 gap-2 bg-gray-800/40 p-3 rounded-xl border border-white/5">
+                {/* Custom Color Picker Button */}
+                <div className="relative">
+                  <button
+                    onClick={() =>
+                      document.getElementById("customColorPicker")?.click()
+                    }
+                    className="w-full aspect-square rounded-lg shadow-sm hover:scale-110 active:scale-95 transition-transform border border-dashed border-white/30 flex items-center justify-center bg-gray-800"
+                    title="Custom Color"
+                  >
+                    <div className="w-5 h-5 rounded-full bg-gradient-to-tr from-purple-500 via-pink-500 to-orange-500" />
+                  </button>
+                  <input
+                    id="customColorPicker"
+                    type="color"
+                    onChange={(e) => onChangeColor?.(e.target.value)}
+                    className="absolute inset-0 opacity-0 cursor-pointer hidden"
+                  />
+                </div>
+
+                {PREMIUM_COLORS.map((color) => (
+                  <button
+                    key={color.value}
+                    onClick={() => onChangeColor?.(color.value)}
+                    className="w-full aspect-square rounded-lg shadow-sm hover:scale-110 active:scale-95 transition-transform border border-white/10"
+                    style={{ backgroundColor: color.value }}
+                    title={color.name}
+                  />
+                ))}
               </div>
-              <span className="text-sm text-gray-200">Color Palette</span>
-            </button>
+            </div>
+
+            <ToolButton
+              icon={Trash2}
+              label="Clear Canvas"
+              variant="default"
+              onClick={onClear || (() => {})}
+            />
           </div>
         </div>
+
+        {/* Font Selection - Only show when text is selected */}
+        {(selectedObjectType === "textbox" ||
+          selectedObjectType === "text") && (
+          <div className="animate-in fade-in slide-in-from-left-4 duration-300">
+            <h3 className="text-xs font-bold text-purple-400 uppercase tracking-wider mb-4 flex items-center gap-2">
+              <Type className="w-3.5 h-3.5" />
+              Text Style
+            </h3>
+            <div className="bg-gray-800/50 border border-purple-500/20 rounded-xl p-4">
+              <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-3 block">
+                Font Family
+              </label>
+              <div className="grid grid-cols-1 gap-1.5 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
+                {GOOGLE_FONTS.map((font) => (
+                  <button
+                    key={font}
+                    onClick={() => onChangeFont?.(font)}
+                    className="w-full px-3 py-2 text-left text-sm text-gray-300 hover:text-white hover:bg-purple-500/10 rounded-lg transition-colors border border-transparent hover:border-purple-500/20"
+                    style={{ fontFamily: font }}
+                  >
+                    {font}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Smart Layouts */}
         <div>
@@ -123,60 +191,24 @@ export default function LeftSidebar({
             Smart Layouts
           </h3>
           <div className="space-y-2">
-            <button
-              onClick={onApplyLayout1}
-              className="w-full flex items-center justify-between px-4 py-3 bg-gradient-to-br from-emerald-500/10 to-green-500/10 hover:from-emerald-500/20 hover:to-green-500/20 border border-emerald-500/30 rounded-xl font-medium text-emerald-300 transition-all duration-200"
-            >
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-gray-900/50">
-                  <Layout className="w-4 h-4" />
-                </div>
-                <span className="text-sm">Hero Focus</span>
-              </div>
-              <span className="text-xs bg-emerald-500/20 px-2 py-1 rounded-md border border-emerald-500/30">
-                Recommended
-              </span>
-            </button>
-
-            <button
-              onClick={onApplyLayout2}
-              className="w-full flex items-center gap-3 px-4 py-3 bg-gray-800/70 hover:bg-gray-700 border border-gray-700 rounded-xl text-left font-medium transition-all duration-200 group"
-            >
-              <div className="p-2 rounded-lg bg-gray-900/50 group-hover:bg-gray-900 transition-colors">
-                <Grid className="w-4 h-4 text-gray-300 group-hover:text-white" />
-              </div>
-              <span className="text-sm text-gray-200">Split Grid</span>
-            </button>
-
-            {/* AI Layout Generator */}
-            <button
-              onClick={onGenerateAILayout}
+            <ToolButton
+              icon={Sparkles}
+              label="AI Layout Generator"
+              onClick={onGenerateAILayout || (() => {})}
+              variant="primary"
+              badge="AI"
               disabled={!hasImageSelected}
-              className="w-full flex items-center justify-between px-4 py-3 bg-gradient-to-br from-purple-500/10 to-fuchsia-500/10 hover:from-purple-500/20 hover:to-fuchsia-500/20 border border-purple-500/30 rounded-xl font-medium text-purple-300 transition-all duration-200 group disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-gray-900/50">
-                  <Sparkles className="w-4 h-4" />
-                </div>
-                <span className="text-sm">AI Layout Generator</span>
-              </div>
-              <span className="text-xs bg-purple-500/20 px-2 py-1 rounded-md border border-purple-500/30">
-                AI
-              </span>
-            </button>
+            />
           </div>
         </div>
 
         {/* Compliance Check */}
-        <button
-          onClick={onCheckCompliance}
-          className="w-full flex items-center gap-3 px-4 py-3 bg-gradient-to-br from-orange-500/10 to-amber-500/10 hover:from-orange-500/20 hover:to-amber-500/20 border border-orange-500/30 rounded-xl font-medium text-orange-300 transition-all duration-200 group"
-        >
-          <div className="p-2 rounded-lg bg-gray-900/50 group-hover:bg-gray-900 transition-colors">
-            <Shield className="w-4 h-4" />
-          </div>
-          <span className="text-sm">Run Compliance Check</span>
-        </button>
+        <ToolButton
+          icon={Shield}
+          label="Run Compliance Check"
+          onClick={onCheckCompliance || (() => {})}
+          variant="warning"
+        />
       </div>
 
       {/* Fixed Export Button at Bottom */}

@@ -2,29 +2,29 @@
 "use client";
 import React from "react";
 
+import { Grid, Sparkles } from "lucide-react";
+
 export default function Header() {
   return (
-    <header className="h-16 border-b border-slate-800 bg-black/80 backdrop-blur-xl flex items-center justify-between px-6">
+    <header className="h-16 border-b border-gray-800 bg-gradient-to-r from-gray-900 via-purple-900/20 to-gray-900 backdrop-blur-xl flex items-center justify-between px-6 sticky top-0 z-50">
       <div className="flex items-center gap-4">
-        <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center text-white font-bold text-xl shadow-lg">
-          CG
+        <div className="relative">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 via-fuchsia-500 to-pink-500 flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-purple-500/50">
+            CG
+          </div>
+          <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full border-2 border-gray-900 animate-pulse"></div>
         </div>
         <div>
-          <h1 className="text-xl font-bold text-white">CreativeGen Studio</h1>
-          <p className="text-xs text-slate-400 flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            AI-powered ad creative builder
+          <h1 className="text-lg font-bold text-white">CreativeGen Studio</h1>
+          <p className="text-xs text-gray-400 flex items-center gap-1.5">
+            <Sparkles className="w-3 h-3 text-purple-400" />
+            AI-Powered Creative Builder
           </p>
         </div>
       </div>
 
       <div className="flex items-center gap-3">
-        <button className="px-4 py-2 rounded-lg border border-slate-700 bg-slate-900/70 text-slate-400 hover:bg-slate-800 transition text-sm font-medium">
-          Settings
-        </button>
-        <button className="px-5 py-2.5 rounded-lg bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white font-semibold hover:from-violet-400 hover:to-fuchsia-400 transition shadow-lg">
-          Upload Snapshot
-        </button>
+        {/* Placeholder for future user actions if needed */}
       </div>
     </header>
   );
