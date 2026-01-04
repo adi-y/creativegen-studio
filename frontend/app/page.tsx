@@ -329,37 +329,45 @@ const CanvasEditor = ({
       };
 
       const handleReplaceImage = async (ev: Event) => {
-        const event = ev as CustomEvent<{
-          dataUrl: string;
-          file?: File;
-          name?: string;
-        }>;
-        const { dataUrl, file, name } = event.detail;
-        if (!dataUrl || !canvasInstance.current || !fabricRef.current) return;
-        const activeObj = canvasInstance.current.getActiveObject();
-        if (!activeObj || activeObj.type !== "image") return;
-        try {
-          const FabricImage = fabricRef.current.Image;
-          const isRemote = dataUrl.startsWith("http");
-          const newImg = await FabricImage.fromURL(
-            dataUrl,
-            isRemote ? { crossOrigin: "anonymous" } : undefined
-          );
-          newImg.set({
-            ...activeObj.toObject(),
-            _originalFile: file || (activeObj as any)._originalFile,
-            _originalUrl: dataUrl,
-            _fileName: name || (activeObj as any)._fileName,
-          });
-          canvasInstance.current.remove(activeObj);
-          canvasInstance.current.add(newImg);
-          newImg.setCoords();
-          canvasInstance.current.setActiveObject(newImg);
-          canvasInstance.current.requestRenderAll();
-        } catch (error) {
-          console.error("Error replacing image:", error);
-        }
-      };
+  const event = ev as CustomEvent<{
+    dataUrl: string;
+    file?: File;
+    name?: string;
+  }>;
+  const { dataUrl, file, name } = event.detail;
+  if (!dataUrl || !canvasInstance.current || !fabricRef.current) return;
+  const activeObj = canvasInstance.current.getActiveObject();
+  if (!activeObj || activeObj.type !== "image") return;
+  try {
+    const FabricImage = fabricRef.current.Image;
+    const isRemote = dataUrl.startsWith("http");
+    const newImg = await FabricImage.fromURL(
+      dataUrl,
+      isRemote ? { crossOrigin: "anonymous" } : undefined
+    );
+    newImg.set({
+      ...activeObj.toObject(),
+      _originalFile: file || (activeObj as any)._originalFile,
+      _originalUrl: dataUrl,
+      _fileName: name || (activeObj as any)._fileName,
+    });
+    canvasInstance.current.remove(activeObj);
+    canvasInstance.current.add(newImg);
+    newImg.setCoords();
+    canvasInstance.current.setActiveObject(newImg);
+    canvasInstance.current.requestRenderAll();
+    
+    // Trigger selection callback after replacement
+    selectionCallbacksRef.current(true, {
+      type: "image",
+      file: file || (activeObj as any)._originalFile,
+      url: dataUrl,
+      name: name || (activeObj as any)._fileName,
+    });
+  } catch (error) {
+    console.error("Error replacing image:", error);
+  }
+};
 
       const handleAddText = () => {
         if (!canvasInstance.current || !fabricRef.current) return;
