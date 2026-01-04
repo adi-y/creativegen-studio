@@ -398,15 +398,18 @@ const CanvasEditor = ({
       const handleExport = () => {
         if (!canvasInstance.current) return;
         try {
+          window.dispatchEvent(new CustomEvent("export-started"));
           const canvas = canvasInstance.current;
           const originalBg = canvas.backgroundColor;
           const originalZoom = canvas.getZoom();
           const originalWidth = canvas.getWidth();
           const originalHeight = canvas.getHeight();
 
+          // Prepare canvas for high-quality export
           canvas.setZoom(1);
           canvas.setDimensions({ width: 1080, height: 1920 });
-          canvas.backgroundColor = "transparent";
+
+          // NOTE: We no longer force transparency here to preserve user selected color
           canvas.renderAll();
 
           const dataURL = canvas.toDataURL({
@@ -415,6 +418,7 @@ const CanvasEditor = ({
             quality: 1,
           });
 
+          // Restore canvas state
           canvas.backgroundColor = originalBg;
           canvas.setDimensions({
             width: originalWidth,
@@ -425,10 +429,21 @@ const CanvasEditor = ({
 
           const link = document.createElement("a");
           link.href = dataURL;
-          link.download = "creativegen-ad.png";
+          link.download = `creativegen-ad-${Date.now()}.png`;
+          document.body.appendChild(link); // Better browser compatibility
           link.click();
+          document.body.removeChild(link);
+
+          window.dispatchEvent(
+            new CustomEvent("export-finished", { detail: { success: true } })
+          );
         } catch (err) {
           console.error("Export failed", err);
+          window.dispatchEvent(
+            new CustomEvent("export-finished", {
+              detail: { success: false, error: err },
+            })
+          );
         }
       };
 
@@ -628,6 +643,7 @@ export default function CreativeGenStudio() {
   const [layoutVariations, setLayoutVariations] = useState<string[]>([]);
   const [logoFile, setLogoFile] = useState<File | null>(null); //  new state
   const [isScanning, setIsScanning] = useState(false);
+  const [isImagePresent, setIsImagePresent] = useState(false);
   const fabricRef = useRef<any>(null);
   const canvasInstance = useRef<any>(null);
 
@@ -653,9 +669,19 @@ export default function CreativeGenStudio() {
       const isImage = hasSelection && meta?.type === "image";
       setHasImageSelected(isImage);
       setSelectedImageMeta(meta);
+
+      // Check if there's at least one image on the canvas
+      if (canvasInstance.current) {
+        const images = canvasInstance.current
+          .getObjects()
+          .filter((obj: any) => obj.type === "image");
+        setIsImagePresent(images.length > 0);
+      }
+
       console.log("Selection changed:", {
         hasSelection,
         isImage,
+        isImagePresent: true,
         metaType: meta?.type,
       });
     },
@@ -697,8 +723,31 @@ export default function CreativeGenStudio() {
   };
 
   const handleRemoveBackground = async () => {
-    if (!hasImageSelected) {
-      showStatus("Please select an image on the canvas first", "error");
+    let targetMeta = selectedImageMeta;
+
+    // If no image is selected, try to find the first one on the canvas
+    if (!hasImageSelected && canvasInstance.current) {
+      const images = canvasInstance.current
+        .getObjects()
+        .filter((obj: any) => obj.type === "image");
+      if (images.length > 0) {
+        const img = images[0];
+        targetMeta = {
+          type: "image",
+          file: img._originalFile,
+          url: img._originalUrl,
+          name: img._fileName,
+        };
+        // Auto-select it for visual feedback
+        canvasInstance.current.setActiveObject(img);
+        canvasInstance.current.requestRenderAll();
+        setHasImageSelected(true);
+        setSelectedImageMeta(targetMeta);
+      }
+    }
+
+    if (!targetMeta) {
+      showStatus("Please upload an image to the canvas first", "error");
       return;
     }
 
@@ -706,13 +755,13 @@ export default function CreativeGenStudio() {
     showStatus("Removing background...", "info");
 
     try {
-      let fileToProcess = selectedImageMeta?.file;
-      if (!fileToProcess && selectedImageMeta?.url) {
-        const res = await fetch(selectedImageMeta.url);
+      let fileToProcess = targetMeta?.file;
+      if (!fileToProcess && targetMeta?.url) {
+        const res = await fetch(targetMeta.url);
         const blob = await res.blob();
         fileToProcess = new File(
           [blob],
-          selectedImageMeta.name || "canvas-image.png",
+          targetMeta.name || "canvas-image.png",
           { type: blob.type || "image/png" }
         );
       }
@@ -800,11 +849,38 @@ export default function CreativeGenStudio() {
     window.dispatchEvent(new CustomEvent("export-canvas"));
   };
 
+  useEffect(() => {
+    const onExportStarted = () =>
+      showStatus("Generating high-quality PNG...", "info");
+    const onExportFinished = (e: any) => {
+      if (e.detail?.success) {
+        showStatus("Export successful!", "success");
+      } else {
+        showStatus("Export failed. Please try again.", "error");
+      }
+    };
+
+    window.addEventListener("export-started", onExportStarted);
+    window.addEventListener(
+      "export-finished",
+      onExportFinished as EventListener
+    );
+
+    return () => {
+      window.removeEventListener("export-started", onExportStarted);
+      window.removeEventListener(
+        "export-finished",
+        onExportFinished as EventListener
+      );
+    };
+  }, []);
+
   const handleClear = () => {
     console.log("Main: Dispatching clear-canvas event");
     window.dispatchEvent(new CustomEvent("clear-canvas"));
     setHasImageSelected(false);
     setSelectedImageMeta(null);
+    setIsImagePresent(false);
     showStatus("Canvas cleared", "info");
   };
 
@@ -826,8 +902,8 @@ export default function CreativeGenStudio() {
   };
 
   const handleGenerateAILayout = () => {
-    if (!hasImageSelected) {
-      showStatus("Please upload and select a product image first", "error");
+    if (!isImagePresent) {
+      showStatus("Please upload a product image first", "error");
       return;
     }
     setIsAILayoutModalOpen(true);
@@ -985,6 +1061,7 @@ export default function CreativeGenStudio() {
           onGenerateAILayout={handleGenerateAILayout}
           onClear={handleClear}
           hasImageSelected={hasImageSelected}
+          isImagePresent={isImagePresent}
           selectedObjectType={selectedImageMeta?.type}
           isProcessing={isProcessing}
         />

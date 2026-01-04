@@ -34,6 +34,7 @@ type LeftSidebarProps = {
   onChangeColor?: (color: string) => void;
   isProcessing?: boolean;
   hasImageSelected?: boolean;
+  isImagePresent?: boolean;
   selectedObjectType?: string | null;
 };
 
@@ -49,6 +50,7 @@ export default function LeftSidebar({
   onChangeColor,
   isProcessing = false,
   hasImageSelected = false,
+  isImagePresent = false,
   selectedObjectType = null,
 }: LeftSidebarProps) {
   const [showBgInfo, setShowBgInfo] = useState(false);
@@ -85,7 +87,7 @@ export default function LeftSidebar({
                 variant="default"
                 badge="AI"
                 onClick={onRemoveBackground || (() => {})}
-                disabled={!hasImageSelected || isProcessing}
+                disabled={!isImagePresent || isProcessing}
                 isLoading={isProcessing}
               />
               <button
@@ -197,7 +199,7 @@ export default function LeftSidebar({
               onClick={onGenerateAILayout || (() => {})}
               variant="primary"
               badge="AI"
-              disabled={!hasImageSelected}
+              disabled={!isImagePresent}
             />
           </div>
         </div>
