@@ -1,8 +1,6 @@
-<img width="1918" height="966" alt="image" src="https://github.com/user-attachments/assets/55a0e205-4a30-47e8-8643-8c49ee6984d9" /># CreativeGen Studio
+## CreativeGen Studio
 
-Monorepo for AI-powered ad creative builder.
-
-<img width="1919" height="968" alt="6a0b094screenshot_2026_01_05_133906" src="https://github.com/user-attachments/assets/f20f04ab-11a6-48ce-805b-0c422e753970" />
+AI-powered ad creative builder — a platform that automates ad generation, letting marketers create professional designs in minutes instead of hours.
 
 ## HomePage
 ![Image](https://github.com/user-attachments/assets/378cbbf4-5519-4d28-9cab-76bc5d3843f0)
@@ -57,8 +55,6 @@ uvicorn background_removal_api:app --reload --port 8001
 ```bash
    GROQ_API_KEY=your_api_key_here
 ```
-
-
 
 ## Tech Stack
 
