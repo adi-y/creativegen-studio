@@ -1,6 +1,25 @@
-# CreativeGen Studio
+<img width="1918" height="966" alt="image" src="https://github.com/user-attachments/assets/55a0e205-4a30-47e8-8643-8c49ee6984d9" /># CreativeGen Studio
 
 Monorepo for AI-powered ad creative builder.
+
+<img width="1919" height="968" alt="6a0b094screenshot_2026_01_05_133906" src="https://github.com/user-attachments/assets/f20f04ab-11a6-48ce-805b-0c422e753970" />
+
+## HomePage
+![Image](https://github.com/user-attachments/assets/378cbbf4-5519-4d28-9cab-76bc5d3843f0)
+
+## Background Removal and Add Text
+![Image](https://github.com/user-attachments/assets/8c98dcc7-639a-4dfe-af36-b87aaca8eb82)
+![Image](https://github.com/user-attachments/assets/b2146cc5-f03e-4742-87ce-7279d157028e)
+![Image](https://github.com/user-attachments/assets/868afe84-767b-45c4-bff4-c025f5f0278a)
+
+## AI Layout Generator
+![Image](https://github.com/user-attachments/assets/1a3b0aa5-d941-441b-885d-655ec1ab7f1d)
+![Image](https://github.com/user-attachments/assets/7e4d4868-d655-42a5-8b97-aa1e18e3df42)
+
+## Sample Output
+![Image](https://github.com/user-attachments/assets/b16921ea-5fac-4b43-991e-d975f34bf24c)
+![Image](https://github.com/user-attachments/assets/fcdc633f-3a77-4a9f-ac38-bb8f3f4ffa76)
+
 
 ## Structure
 
